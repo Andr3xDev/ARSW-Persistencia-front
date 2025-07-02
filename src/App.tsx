@@ -10,7 +10,7 @@ const App: React.FC = () => {
     return (
         <main className="flex flex-col w-screen h-screen items-center justify-center bg-[#303030]">
             <h1 className="text-4xl font-bold mb-8 text-white">
-                Registro de Estudiantes
+                Students Register
             </h1>
 
             <div className="bg-[#282828] p-8 rounded-xl shadow-lg flex flex-col gap-10 items-center">
