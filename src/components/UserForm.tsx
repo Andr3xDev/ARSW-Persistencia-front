@@ -1,51 +1,94 @@
-// src/components/UserForm.tsx
 import React, { useState } from "react";
-import { type User } from "../models/user.model";
-import { createUser } from "../services/userService";
+import axios from "axios";
 
-interface UserFormProps {
-    onUserCreated: (user: User) => void;
+interface IStudentData {
+    _id?: string;
+    name: string;
+    email: string;
+    birthdate: string; // ✅ CORREGIDO: de 'birthDate' a 'birthdate'
+    program: string;
 }
 
-const UserForm: React.FC<UserFormProps> = ({ onUserCreated }) => {
-    const [nombre, setNombre] = useState("");
-    const [correo, setCorreo] = useState("");
-    const [fechaNacimiento, setFechaNacimiento] = useState("");
-    const [programa, setPrograma] = useState("");
+interface IStudentFormProps {
+    onStudentAdded: () => void;
+}
 
-    const handleSubmit = async (e: React.FormEvent) => {
+export default function UserForm({
+    onStudentAdded,
+}: Readonly<IStudentFormProps>) {
+    const [formData, setFormData] = useState<IStudentData>({
+        name: "",
+        email: "",
+        birthdate: "", // ✅ CORREGIDO: de 'birthDate' a 'birthdate'
+        program: "",
+    });
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const newUser: User = { nombre, correo, fechaNacimiento, programa };
         try {
-            const createdUser = await createUser(newUser);
-            onUserCreated(createdUser); // Notifica al componente padre
-            // Limpiar formulario
-            setNombre("");
-            setCorreo("");
-            setFechaNacimiento("");
-            setPrograma("");
+            await axios.post("http://localhost:8080/users", formData);
+            onStudentAdded();
+            setFormData({ name: "", email: "", birthdate: "", program: "" }); // ✅ CORREGIDO
         } catch (error) {
-            console.error(error);
-            alert("Fallo al crear el usuario.");
+            console.error("Error al guardar el estudiante:", error);
+            // Manejar el error, por ejemplo, mostrando una notificación al usuario.
         }
     };
 
+    const inputStyles =
+        "w-full p-3 bg-[#3c3c3c] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow";
+
     return (
-        <form
-            onSubmit={handleSubmit}
-            className="p-6 mb-8 bg-white shadow-md rounded-lg"
-        >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* ... campos del formulario ... */}
-            </div>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-96">
+                        {/* ...otros inputs para name, email, program... */}
+            <input
+                name="name"
+                value={formData.name}
+                placeholder="Nombre completo"
+                onChange={handleChange}
+                className={inputStyles}
+                required
+            />
+                       {" "}
+            <input
+                name="email"
+                value={formData.email}
+                placeholder="Correo electrónico"
+                type="email"
+                onChange={handleChange}
+                className={inputStyles}
+                required
+            />
+                       {" "}
+            <input
+                name="birthdate" // ✅ CORREGIDO: de 'birthDate' a 'birthdate'
+                value={formData.birthdate} // ✅ CORREGIDO
+                type="date"
+                onChange={handleChange}
+                className={inputStyles}
+                required
+            />
+                       {" "}
+            <input
+                name="program"
+                value={formData.program}
+                placeholder="Programa académico"
+                onChange={handleChange}
+                className={inputStyles}
+                required
+            />
+                       {" "}
             <button
                 type="submit"
-                className="w-full mt-4 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300"
+                className="w-full p-3 bg-blue-600 rounded-lg text-white font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#282828] transition-colors"
             >
-                Registrar Estudiante
+                                Guardar Estudiante            {" "}
             </button>
+                   {" "}
         </form>
     );
-};
-
-export default UserForm;
+}
